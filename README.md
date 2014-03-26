@@ -133,25 +133,20 @@ may reset the wireless network.
 
 ## tunnelbroker.sh
 
-This script configures CeroWrt to create an IPv6 tunnel 
-to Hurricane Electric at [http://www.tunnelbroker.net/](http://www.tunnelbroker.net/) This is useful if your ISP doesn't offer native IPv6 capabilities.
+This script configures CeroWrt to create an IPv6 tunnel. 
+It's an easy way to become familiar with IPv6 if your ISP doesn't offer native IPv6 capabilities. There are three steps:
 
-There are two steps:
-
-1. Go to the Tunnelbroker.net site to set up your free account. There are detailed instructions for setting up an IPv6 tunnel at the
+1. Go to the Hurricane Electric [TunnelBroker.net](http://www.tunnelbroker.net/)  site to set up your free account. There are detailed instructions for setting up an account and an IPv6 tunnel at the
    [CeroWrt IPv6 Tunnel page.](http://www.bufferbloat.net/projects/cerowrt/wiki/IPv6_Tunnel) 
-2. Run the script below, using the parameters supplied by Tunnelbroker.net
-
-Once you've created your account and set up your first tunnel, go to the TunnelBroker site's "Tunnel Details", and click on the "Example
-Configurations" tab. Select "OpenWRT Backfire 10.03.1", and use the info to fill in the corresponding lines of the script. Finally, ssh into the 
-CeroWrt router and execute this script with these steps:
-
-    ssh root@172.30.42.1
-    cd /tmp
-    cat > tunnel.sh 
-    [paste in the contents of this file, then hit ^D]
-    sh tunnel.sh
-    [Restart your router. This seems to make a difference.]
+2. Edit the tunnelbroker.sh script, using the parameters supplied by Tunnelbroker.net. They're on the site's "Tunnel Details" page. Click on the "Example
+Configurations" tab and select "OpenWRT Backfire 10.03.1". Use the info to fill in the corresponding lines of the script. 
+3. ssh into the CeroWrt router and execute this script with these steps.
     
-Presto! Your tunnel is set up. You should now be able 
-      communicate directly with IPv6 devices. 
+        ssh root@172.30.42.1
+        cd /tmp
+        cat > tunnel.sh 
+        [paste in the contents of this file, then hit ^D]
+        sh tunnel.sh
+        [Restart your router. This seems to make a difference.]
+  
+Presto! Your tunnel is up! Your computer should get a global IPv6 address, and should be able to communicate directly with IPv6 devices on the Internet. To test it, try: `ping6 ivp6.google.com`
