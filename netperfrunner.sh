@@ -1,53 +1,156 @@
 #! /bin/sh
 # Netperfrunner.sh - a shell script that runs several netperf commands simultaneously.
 # This mimics the stress test of netperf-wrapper from Toke <toke@toke.dk> 
-# but doesn't have the nice GUI result.
-# This can live in /usr/lib/sqm within CeroWrt
+# but doesn't have the nice GUI result. This can live in /usr/lib/sqm within CeroWrt
 # 
 # When you start this script, it concurrently uploads and downloads multiple
 # streams (files) to a server on the Internet. This places a heavy load 
 # on the bottleneck link of your network(probably your connection to the 
-# Internet), and lets you measure:
+# Internet). It also starts a ping to a well-connected host. It displays:
 #
 # a) total bandwidth available 
-# b) latency, if you run a ping in a separate terminal window
+# b) the distribution of latency
 # 
-# Original version: 22 Feb 2014 - richb.hanover@gmail.com
+# Copyright (c) 2104 - Rich Brown richb.hanover@gmail.com
+# GPLv2
+
+# Usage: sh betterspeedtest.sh [ -H netperf-server ] [ -t duration ] [ -t host-to-ping ]
+
+# Options: If options are present:
+#
+# -H | --host: DNS or Address of a netperf server (default - netperf.richb-hanover.com)
+# -t | --time: Duration for how long each direction's test should run - (default - 60 seconds)
+# -p | --ping: Host to ping to measure latency (default - gstatic.com)
+
+# Summarize the contents of the ping's output file to show min, avg, median, max, etc.
+# 	input parameter ($1) file contains the output of the ping command
+
+summarize_pings() {			
+	
+	# Process the ping times, and summarize the results
+	# grep to keep lines that have "time=", then sed to isolate the time stamps, and sort them
+	# awk builds an array of those values, and prints first & last (which are min, max) 
+	#	and computes average.
+	# If the number of samples is >= 10, also computes median, and 10th and 90th percentile readings
+	sed 's/^.*time=\([^ ]*\) ms/\1/' < $1 | grep -v "PING" | sort -n | \
+	awk 'BEGIN {numdrops=0; numrows=0;} \
+		{ \
+			if ( $0 ~ /timeout/ ) { \
+			   	numdrops += 1; \
+			} else { \
+				numrows += 1; \
+				arr[numrows]=$1; sum+=$1; \
+			} \
+		} \
+		END { \
+			pc10="-"; pc90="-"; med="-"; \
+			if (numrows == 0) {numrows=1} \
+			if (numrows>=10) \
+			{ 	ix=int(numrows/10); pc10=arr[ix]; ix=int(numrows*9/10);pc90=arr[ix]; \
+				if (numrows%2==1) med=arr[(numrows+1)/2]; else med=(arr[numrows/2]); \
+			}; \
+			pktloss = numdrops/(numdrops+numrows) * 100; \
+			printf("  Latency: (in msec, %d pings, %4.2f%% packet loss)\n      Min: %4.3f \n    10pct: %4.3f \n   Median: %4.3f \n      Avg: %4.3f \n    90pct: %4.3f \n      Max: %4.3f\n", numrows, pktloss, arr[1], pc10, med, sum/numrows, pc90, arr[numrows] )\
+		 }'
+}
+
+# ------- Start of the main routine --------
+
+# Usage: sh betterspeedtest.sh [ -H netperf-server ] [ -t duration ] [ -p host-to-ping ]
+
+# “H” and “host” DNS or IP address of the netperf server host (default: netperf.richb-hanover.com)
+# “t” and “time” Time to run the test in each direction (default: 60 seconds)
+# “p” and “ping” Host to ping for latency measurements (default: gstatic.com)
+
+# set an initial values for defaults
+TESTHOST="netperf.richb-hanover.com"
+TESTDUR="60"
+PINGHOST="gstatic.com"
+MAXSESSIONS=4
 
 # Create temp files for netperf up/download results
 ULFILE=`mktemp /tmp/netperfUL.XXXXXX` || exit 1
 DLFILE=`mktemp /tmp/netperfDL.XXXXXX` || exit 1
+PINGFILE=`mktemp /tmp/measurepings.XXXXXX` || exit 1
+# echo $ULFILE $DLFILE $PINGFILE
 
-# Default values for test duration and netperf server host
-TESTDUR="60"
-TESTHOST="netperf.richb-hanover.com"
+# read the options
 
-echo "Starting Network Performance tests. It will take about $TESTDUR seconds."
-echo "It downloads four files, and concurrently uploads four files for maximum stress."
-echo "For best effect, you should start a ping before starting this script"
-echo "  to measure how much latency increases during the test. (It shouldn't"
-echo "  increase much at all.)"
-echo "This test is part of the CeroWrt project. To learn more, visit:"
-echo "  http://bufferbloat.net/projects/cerowrt/"
+# extract options and their arguments into variables.
+while [ $# -gt 0 ] 
+do
+    case "$1" in
+        -H|--host)
+            case "$2" in
+                "") echo "Missing hostname" ; exit 1 ;;
+                *) TESTHOST=$2 ; shift 2 ;;
+            esac ;;
+        -t|--time) 
+        	case "$2" in
+        		"") echo "Missing duration" ; exit 1 ;;
+                *) TESTDUR=$2 ; shift 2 ;;
+            esac ;;
+        -p|--ping)
+            case "$2" in
+                "") echo "Missing ping host" ; exit 1 ;;
+                *) PINGHOST=$2 ; shift 2 ;;
+            esac ;;
+        --) shift ; break ;;
+        *) echo "Usage: sh Netperfrunner.sh [ -H netperf-server ] [ -t duration ] [ -p host-to-ping ]" ; exit 1 ;;
+    esac
+done
 
-# send data from netperf client to the netperf server
+echo "Testing $MAXSESSIONS streams down and $MAXSESSIONS streams up to $TESTHOST"
+echo "     while pinging $PINGHOST. Takes about $TESTDUR seconds."
+# echo "It downloads four files, and concurrently uploads four files for maximum stress."
+# echo "It also pings a well-connected host, and prints a summary of the latency results."
+# echo "This test is part of the CeroWrt project. To learn more, visit:"
+# echo "  http://bufferbloat.net/projects/cerowrt/"
+
+# Start Ping
+ping $PINGHOST > $PINGFILE &
+ping_pid=$!
+# echo "Ping PID: $ping_pid"
+
+# pids is an array of the netperf background processes. We'll wait for them to 
+# complete later on.
+declare -a pids
+pids=()
+
+# Start $MAXSESSIONS datastreams from netperf client to the netperf server
 # netperf writes the sole output value (in Mbps) to stdout when completed
-{ netperf -H $TESTHOST -t TCP_STREAM -l $TESTDUR -v 0 -P 0 >> $ULFILE; } &
-{ netperf -H $TESTHOST -t TCP_STREAM -l $TESTDUR -v 0 -P 0 >> $ULFILE; } &
-{ netperf -H $TESTHOST -t TCP_STREAM -l $TESTDUR -v 0 -P 0 >> $ULFILE; } &
-{ netperf -H $TESTHOST -t TCP_STREAM -l $TESTDUR -v 0 -P 0 >> $ULFILE; } &
+for ((i=1; i <= $MAXSESSIONS; i++))
+do
+	netperf -H $TESTHOST -t TCP_STREAM -l $TESTDUR -v 0 -P 0 >> $ULFILE &
+	pids+=($!)
+done
 
-# send data from netperf server to the client
-{ netperf -H $TESTHOST -t TCP_MAERTS -l $TESTDUR -v 0 -P 0 >> $DLFILE; } &
-{ netperf -H $TESTHOST -t TCP_MAERTS -l $TESTDUR -v 0 -P 0 >> $DLFILE; } &
-{ netperf -H $TESTHOST -t TCP_MAERTS -l $TESTDUR -v 0 -P 0 >> $DLFILE; } &
-{ netperf -H $TESTHOST -t TCP_MAERTS -l $TESTDUR -v 0 -P 0 >> $DLFILE; } &
+# Start $MAXSESSIONS datastreams from netperf server to the client
+for ((i=1; i <= $MAXSESSIONS; i++))
+do
+	netperf -H $TESTHOST -t TCP_MAERTS -l $TESTDUR -v 0 -P 0 >> $DLFILE &
+	pids+=($!)
+done
 
-# wait until all the background tasks finish
-wait
-# cat $DLFILE
-# cat $ULFILE
+# Wait for all the background netperf processes to complete 
+# echo "Array values ${pids[@]}"
+for ((i=0; i< ${#pids[*]}; i++))
+do
+	wait ${pids[$i]}
+	# echo "${pids[$i]}"
+done
+
+# Stop the pings after the netperf's are all done
+kill -9 $ping_pid
+wait $ping_pid 2>/dev/null
 
 # sum up all the values (one line per netperf test) from $DLFILE and $ULFILE
-echo "Download: " `awk '{s+=$1} END {print s}' $DLFILE` Mbps
-echo "  Upload: " `awk '{s+=$1} END {print s}' $ULFILE` Mbps
+# then summarize the ping stat's
+echo " Download: " `awk '{s+=$1} END {print s}' $DLFILE` Mbps
+echo "   Upload: " `awk '{s+=$1} END {print s}' $ULFILE` Mbps
+summarize_pings $PINGFILE
+
+# Clean up
+rm $PINGFILE
+rm $DLFILE
+rm $ULFILE
