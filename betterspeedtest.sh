@@ -168,7 +168,8 @@ done
 
 # Start the main test
 
-echo "Testing against $TESTHOST while pinging $PINGHOST ($TESTDUR seconds in each direction)"
+DATE=`date "+%Y-%m-%d %H:%M:%S"`
+echo "$DATE Testing against $TESTHOST while pinging $PINGHOST ($TESTDUR seconds in each direction)"
 
 # Catch a Ctl-C and stop the pinging and the print_dots
 trap kill_pings_and_dots_and_exit SIGHUP SIGINT SIGTERM
