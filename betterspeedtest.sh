@@ -1,17 +1,18 @@
 #!/bin/sh
 
 # betterspeedtest.sh - Script to simulate http://speedtest.net
-# Start pinging, then initiate a 60 second download, then a 60 second upload
-# Output the measured transfer rate and the resulting ping latency
-# It's better because it measures latency while measuring the speed.
+# Start pinging, then initiate a 60 second download, let it finish, then a 60 second upload
+# Output the measured transfer rates and the resulting ping latency
+# It's better than 'speedtest.net' because it measures latency while measuring the speed.
 
-# Usage: sh betterspeedtest.sh [ -H netperf-server ] [ -t duration ] [ -t host-to-ping ]
+# Usage: sh betterspeedtest.sh [ -H netperf-server ] [ -t duration ] [ -t host-to-ping ] [ -n simultaneous-streams ]
 
 # Options: If options are present:
 #
 # -H | --host: DNS or Address of a netperf server (default - netperf.richb-hanover.com)
 # -t | --time: Duration for how long each direction's test should run - (default - 60 seconds)
 # -p | --ping: Host to ping to measure latency (default - gstatic.com)
+# -n | --number: Number of simultaneous sessions (default - 5 sessions)
 
 # Copyright (c) 2014 - Rich Brown
 # GPLv2
@@ -109,8 +110,27 @@ measure_direction() {
 	else
 		dir="TCP_STREAM"
 	fi
-	# netperf -H HOST-TO-TEST -t DIRECTION -l DURATION ...
-	netperf -H $2 -t $dir -l $3 -v 0 -P 0 >> $SPEEDFILE
+	
+	# pids is an array of the netperf background processes. We'll wait for them to 
+	# complete later on.
+	declare -a pids
+	pids=()
+	
+	# Start $MAXSESSIONS datastreams between netperf client and the netperf server
+	# netperf writes the sole output value (in Mbps) to stdout when completed
+	for ((i=1; i <= $MAXSESSIONS; i++))
+	do
+		netperf -H $TESTHOST -t $dir -l $TESTDUR -v 0 -P 0 >> $SPEEDFILE &
+		pids+=($!)
+	done
+	
+	# Wait until each of the background netperf processes completes 
+	# echo "Array values ${pids[@]}"
+	for ((i=0; i< ${#pids[*]}; i++))
+	do
+		wait ${pids[$i]}
+		# echo "${pids[$i]}"
+	done
 
 	# Print TCP Download speed
 	echo ""
@@ -139,6 +159,7 @@ measure_direction() {
 TESTHOST="netperf.richb-hanover.com"
 TESTDUR="60"
 PINGHOST="gstatic.com"
+MAXSESSIONS="5"
 
 # read the options
 
@@ -161,6 +182,11 @@ do
                 "") echo "Missing ping host" ; exit 1 ;;
                 *) PINGHOST=$2 ; shift 2 ;;
             esac ;;
+        -n|--number)
+        	case "$2" in
+        		"") echo "Missing number of simultaneous sessions" ; exit 1 ;;
+        		*) MAXSESSIONS=$2 ; shift 2 ;;
+        	esac ;;
         --) shift ; break ;;
         *) echo "Usage: sh betterspeedtest.sh [ -H netperf-server ] [ -t duration ] [ -p host-to-ping ]" ; exit 1 ;;
     esac
@@ -169,10 +195,10 @@ done
 # Start the main test
 
 DATE=`date "+%Y-%m-%d %H:%M:%S"`
-echo "$DATE Testing against $TESTHOST while pinging $PINGHOST ($TESTDUR seconds in each direction)"
+echo "$DATE Testing against $TESTHOST with $MAXSESSIONS simultaneous streams while pinging $PINGHOST ($TESTDUR seconds in each direction)"
 
 # Catch a Ctl-C and stop the pinging and the print_dots
 trap kill_pings_and_dots_and_exit SIGHUP SIGINT SIGTERM
 
-measure_direction "Download" $TESTHOST $TESTDUR $PINGHOST
-measure_direction "  Upload" $TESTHOST $TESTDUR $PINGHOST
+measure_direction "Download" $TESTHOST $TESTDUR $PINGHOST $MAXSESSIONS
+measure_direction "  Upload" $TESTHOST $TESTDUR $PINGHOST $MAXSESSIONS
