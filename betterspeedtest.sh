@@ -188,7 +188,7 @@ do
         		*) MAXSESSIONS=$2 ; shift 2 ;;
         	esac ;;
         --) shift ; break ;;
-        *) echo "Usage: sh betterspeedtest.sh [ -H netperf-server ] [ -t duration ] [ -p host-to-ping ]" ; exit 1 ;;
+        *) echo "Usage: sh betterspeedtest.sh [ -H netperf-server ] [ -t duration ] [ -p host-to-ping ] [ -n simultaneous-sessions ]" ; exit 1 ;;
     esac
 done
 
