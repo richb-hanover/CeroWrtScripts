@@ -14,7 +14,7 @@
 # -p | --ping: Host to ping to measure latency (default - gstatic.com)
 # -n | --number: Number of simultaneous sessions (default - 5 sessions)
 
-# Copyright (c) 2014 - Rich Brown
+# Copyright (c) 2014 - Rich Brown rich.brown@blueberryhillsoftware.com
 # GPLv2
 
 # Summarize the contents of the ping's output file to show min, avg, median, max, etc.
@@ -114,22 +114,22 @@ measure_direction() {
 	# pids is an array of the netperf background processes. We'll wait for them to 
 	# complete later on.
 	declare -a pids
-	pids=()
+	# pids=()
 	
 	# Start $MAXSESSIONS datastreams between netperf client and the netperf server
 	# netperf writes the sole output value (in Mbps) to stdout when completed
-	for ((i=1; i <= $MAXSESSIONS; i++))
+	for i in { 1 .. $MAXSESSIONS }
 	do
 		netperf -H $TESTHOST -t $dir -l $TESTDUR -v 0 -P 0 >> $SPEEDFILE &
 		pids+=($!)
 	done
 	
 	# Wait until each of the background netperf processes completes 
-	# echo "Array values ${pids[@]}"
-	for ((i=0; i< ${#pids[*]}; i++))
+	echo "PIDs are: ${pids[@]}"
+	for i in "${pids[@]}"
 	do
-		wait ${pids[$i]}
-		# echo "${pids[$i]}"
+		wait $i
+		echo $i
 	done
 
 	# Print TCP Download speed
@@ -149,11 +149,13 @@ measure_direction() {
 
 # ------- Start of the main routine --------
 
-# Usage: sh betterspeedtest.sh [ -H netperf-server ] [ -t duration ] [ -p host-to-ping ]
+# Usage: sh betterspeedtest.sh [ -H netperf-server ] [ -t duration ] [ -p host-to-ping ] [ -n simultaneous-sessions ]
 
 # “H” and “host” DNS or IP address of the netperf server host (default: netperf.richb-hanover.com)
 # “t” and “time” Time to run the test in each direction (default: 60 seconds)
 # “p” and “ping” Host to ping for latency measurements (default: gstatic.com)
+# "n" and "number" Number of simultaneous upload or download sessions (default: 5 sessions;
+#       5 sessions chosen empirically because total didn't increase much after that number)
 
 # set an initial values for defaults
 TESTHOST="netperf.richb-hanover.com"
@@ -195,7 +197,7 @@ done
 # Start the main test
 
 DATE=`date "+%Y-%m-%d %H:%M:%S"`
-echo "$DATE Testing against $TESTHOST with $MAXSESSIONS simultaneous streams while pinging $PINGHOST ($TESTDUR seconds in each direction)"
+echo "$DATE Testing against $TESTHOST with $MAXSESSIONS simultaneous sessions while pinging $PINGHOST ($TESTDUR seconds in each direction)"
 
 # Catch a Ctl-C and stop the pinging and the print_dots
 trap kill_pings_and_dots_and_exit SIGHUP SIGINT SIGTERM
