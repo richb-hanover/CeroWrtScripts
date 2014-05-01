@@ -1,16 +1,23 @@
 CeroWrtScripts
 ==============
 
-The CeroWrt router firmware project has largely eliminated the problem of *bufferbloat*, which is a common reason that people complain, "the Internet feels slow today." The techniques that the CeroWrt team have proved out are being widely adopted across the Internet to make everyone's network performance better.
+The CeroWrt router firmware project has largely eliminated the problem of *bufferbloat*, 
+which is a common reason that people complain, "the Internet feels slow today." 
+The techniques that the CeroWrt team have proved out are being widely adopted across 
+the Internet to make everyone's network performance better.
 
-This is a set of scripts that we use to measure (and improve) latency in home routers (and everywhere else!) [http://bufferbloat.net/projects/cerowrt](http://bufferbloat.net/projects/cerowrt)
+This is a set of scripts that we use to measure (and improve) latency in home routers (and everywhere else!) 
+[http://bufferbloat.net/projects/cerowrt](http://bufferbloat.net/projects/cerowrt)
+These scripts include:
 
-The first three scripts measure the performance of your router.
+* Scripts that measure the performance of your router or offer load to the network for testing.
 
-The second two scripts configure the CeroWrt router consistently after flashing factory firmware, and set up a IPv6 6-in-4 tunnel to TunnelBroker.net.
+* Scripts to configure the CeroWrt router consistently after flashing factory firmware, 
+and set up a IPv6 6-in-4 tunnel to TunnelBroker.net.
 
-The remaining scripts collect troubleshooting information that helps us diagnose problems in the CeroWrt distribution.
+* Scripts to collect troubleshooting information that helps us diagnose problems in the CeroWrt distribution.
 
+---
 ## betterspeedtest.sh
 
 This script emulates the web-based test performed by speedtest.net, but does it one better. While script performs a download and an upload to a server on the Internet, it simultaneously measures latency of pings to see whether the file transfers affect the responsiveness of your network. 
@@ -28,7 +35,7 @@ Options, if present, are:
 * -p | --ping: Host to ping to measure latency (default - gstatic.com)
 * -n | --number: Number of simultaneous sessions (default - 5 sessions)
 
-The output shows the one-way download and upload speed, along with a summary of latencies, including min, max, average, median, and 10th and 90th percentiles so you can get a sense of the distribution. The tool also displays the percent packet loss. The example below shows two measurements, bad and good. 
+The output shows separate (one-way) download and upload speed, along with a summary of latencies, including min, max, average, median, and 10th and 90th percentiles so you can get a sense of the distribution. The tool also displays the percent packet loss. The example below shows two measurements, bad and good. 
 
 On the left is a test run without SQM. Note that the latency gets huge (greater than 5 seconds), meaning that network performance would be terrible for anyone else using the network. 
 
