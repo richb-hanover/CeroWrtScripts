@@ -1,14 +1,20 @@
 #! /bin/sh
-# a collection of diagnostics to take when wifi troubles arise:
+# a collection of diagnostics to take when wifi troubles arise.
+# The default script collects stats for the first 2.4GHz interface. 
+# Change for your situation.
+#
+# - phy0 - 2.4GHz radio
+# - sw00 - First 2.4GHz wireless interface
+#
+# Write the collected data to /tmp/cerostats_output.txt
 
-out_fqn=/tmp/wifi_debug_output.txt
 radio=phy0
 wlan_if=sw00
+out_fqn=/tmp/cerostats_output.txt
 #ath9k_sub_dis=(interrupt queues xmit recv reset)
 
-
-echo -e "date" >> ${out_fqn}
-date > ${out_fqn}
+echo -e "date" > ${out_fqn}
+date >> ${out_fqn}
 echo -e "\n" >> ${out_fqn}
 
 echo -e "uname -a" >> ${out_fqn}
@@ -17,6 +23,10 @@ echo -e "\n" >> ${out_fqn}
 
 echo -e "uptime" >> ${out_fqn}
 echo $( uptime ) >> ${out_fqn}
+echo -e "\n" >> ${out_fqn}
+
+echo -e "ifconfig" >> ${out_fqn}
+ifconfig >> ${out_fqn}
 echo -e "\n" >> ${out_fqn}
 
 echo -e "tc -s qdisc show dev ${wlan_if}" >> ${out_fqn}
@@ -60,4 +70,4 @@ dmesg >> ${out_fqn}
 echo -e "" >> ${out_fqn}
 
 
-echo "Done... (${0})"
+echo "Done... Stats written to ${out_fqn} (${0})"
