@@ -5,22 +5,26 @@
 # 
 # When you start this script, it concurrently uploads and downloads multiple
 # streams (files) to a server on the Internet. This places a heavy load 
-# on the bottleneck link of your network(probably your connection to the 
+# on the bottleneck link of your network (probably your connection to the 
 # Internet). It also starts a ping to a well-connected host. It displays:
 #
 # a) total bandwidth available 
-# b) the distribution of latency
+# b) the distribution of ping latency
 # 
 # Copyright (c) 2104 - Rich Brown richb.hanover@gmail.com
 # GPLv2
 
-# Usage: sh betterspeedtest.sh [ -H netperf-server ] [ -t duration ] [ -t host-to-ping ]
+# Usage: sh netperfrunner.sh [ -H netperf-server ] [ -t duration ] [ -t host-to-ping ] [ -n simultaneous-streams ]
 
 # Options: If options are present:
 #
-# -H | --host: DNS or Address of a netperf server (default - netperf.richb-hanover.com)
-# -t | --time: Duration for how long each direction's test should run - (default - 60 seconds)
-# -p | --ping: Host to ping to measure latency (default - gstatic.com)
+# -H | --host:   DNS or Address of a netperf server (default - netperf.richb-hanover.com)
+# -t | --time:   Duration for how long each direction's test should run - (default - 60 seconds)
+# -p | --ping:   Host to ping to measure latency (default - gstatic.com)
+# -n | --number: Number of simultaneous sessions (default - 5 sessions)
+
+# Copyright (c) 2014 - Rich Brown rich.brown@blueberryhillsoftware.com
+# GPLv2
 
 # Summarize the contents of the ping's output file to show min, avg, median, max, etc.
 # 	input parameter ($1) file contains the output of the ping command
@@ -61,6 +65,8 @@ summarize_pings() {
 # “H” and “host” DNS or IP address of the netperf server host (default: netperf.richb-hanover.com)
 # “t” and “time” Time to run the test in each direction (default: 60 seconds)
 # “p” and “ping” Host to ping for latency measurements (default: gstatic.com)
+# "n" and "number" Number of simultaneous upload or download sessions (default: 4 sessions;
+#       4 sessions chosen to match default of RRUL test)
 
 # set an initial values for defaults
 TESTHOST="netperf.richb-hanover.com"
@@ -95,8 +101,13 @@ do
                 "") echo "Missing ping host" ; exit 1 ;;
                 *) PINGHOST=$2 ; shift 2 ;;
             esac ;;
+        -n|--number)
+        	case "$2" in
+        		"") echo "Missing number of simultaneous sessions" ; exit 1 ;;
+        		*) MAXSESSIONS=$2 ; shift 2 ;;
+        	esac ;;
         --) shift ; break ;;
-        *) echo "Usage: sh Netperfrunner.sh [ -H netperf-server ] [ -t duration ] [ -p host-to-ping ]" ; exit 1 ;;
+        *) echo "Usage: sh Netperfrunner.sh [ -H netperf-server ] [ -t duration ] [ -p host-to-ping ] [ -n simultaneous-streams ]" ; exit 1 ;;
     esac
 done
 
@@ -112,32 +123,26 @@ ping $PINGHOST > $PINGFILE &
 ping_pid=$!
 # echo "Ping PID: $ping_pid"
 
-# pids is an array of the netperf background processes. We'll wait for them to 
-# complete later on.
-declare -a pids
-pids=()
-
-# Start $MAXSESSIONS datastreams from netperf client to the netperf server
+# Start $MAXSESSIONS upload datastreams from netperf client to the netperf server
 # netperf writes the sole output value (in Mbps) to stdout when completed
-for ((i=1; i <= $MAXSESSIONS; i++))
+for i in $( seq $MAXSESSIONS )
 do
 	netperf -H $TESTHOST -t TCP_STREAM -l $TESTDUR -v 0 -P 0 >> $ULFILE &
-	pids+=($!)
+	# echo "Starting upload #$i $!"
 done
 
-# Start $MAXSESSIONS datastreams from netperf server to the client
-for ((i=1; i <= $MAXSESSIONS; i++))
+# Start $MAXSESSIONS download datastreams from netperf server to the client
+for i in $( seq $MAXSESSIONS )
 do
 	netperf -H $TESTHOST -t TCP_MAERTS -l $TESTDUR -v 0 -P 0 >> $DLFILE &
-	pids+=($!)
+	# echo "Starting download #$i $!"
 done
 
-# Wait for all the background netperf processes to complete 
-# echo "Array values ${pids[@]}"
-for ((i=0; i< ${#pids[*]}; i++))
+# Wait until each of the background netperf processes completes 
+for i in `pgrep netperf`		# gets a list of PIDs for processes named 'netperf'
 do
-	wait ${pids[$i]}
-	# echo "${pids[$i]}"
+	# echo "Waiting for $i"
+	wait $i
 done
 
 # Stop the pings after the netperf's are all done

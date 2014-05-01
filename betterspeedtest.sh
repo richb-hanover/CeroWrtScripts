@@ -1,17 +1,17 @@
 #!/bin/sh
 
 # betterspeedtest.sh - Script to simulate http://speedtest.net
-# Start pinging, then initiate a 60 second download, let it finish, then a 60 second upload
+# Start pinging, then initiate a download, let it finish, then start an upload
 # Output the measured transfer rates and the resulting ping latency
-# It's better than 'speedtest.net' because it measures latency while measuring the speed.
+# It's better than 'speedtest.net' because it measures latency *while* measuring the speed.
 
 # Usage: sh betterspeedtest.sh [ -H netperf-server ] [ -t duration ] [ -t host-to-ping ] [ -n simultaneous-streams ]
 
 # Options: If options are present:
 #
-# -H | --host: DNS or Address of a netperf server (default - netperf.richb-hanover.com)
-# -t | --time: Duration for how long each direction's test should run - (default - 60 seconds)
-# -p | --ping: Host to ping to measure latency (default - gstatic.com)
+# -H | --host:   DNS or Address of a netperf server (default - netperf.richb-hanover.com)
+# -t | --time:   Duration for how long each direction's test should run - (default - 60 seconds)
+# -p | --ping:   Host to ping to measure latency (default - gstatic.com)
 # -n | --number: Number of simultaneous sessions (default - 5 sessions)
 
 # Copyright (c) 2014 - Rich Brown rich.brown@blueberryhillsoftware.com
@@ -111,25 +111,19 @@ measure_direction() {
 		dir="TCP_STREAM"
 	fi
 	
-	# pids is an array of the netperf background processes. We'll wait for them to 
-	# complete later on.
-	declare -a pids
-	# pids=()
-	
 	# Start $MAXSESSIONS datastreams between netperf client and the netperf server
 	# netperf writes the sole output value (in Mbps) to stdout when completed
-	for i in { 1 .. $MAXSESSIONS }
+	for i in $( seq $MAXSESSIONS )
 	do
 		netperf -H $TESTHOST -t $dir -l $TESTDUR -v 0 -P 0 >> $SPEEDFILE &
-		pids+=($!)
+		#echo "Starting $!"
 	done
 	
 	# Wait until each of the background netperf processes completes 
-	echo "PIDs are: ${pids[@]}"
-	for i in "${pids[@]}"
+	for i in `pgrep netperf`		# gets a list of PIDs for processes named 'netperf'
 	do
+		#echo "Waiting for $i"
 		wait $i
-		echo $i
 	done
 
 	# Print TCP Download speed
@@ -204,3 +198,4 @@ trap kill_pings_and_dots_and_exit SIGHUP SIGINT SIGTERM
 
 measure_direction "Download" $TESTHOST $TESTDUR $PINGHOST $MAXSESSIONS
 measure_direction "  Upload" $TESTHOST $TESTDUR $PINGHOST $MAXSESSIONS
+
