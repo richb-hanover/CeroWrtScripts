@@ -5,37 +5,41 @@ The CeroWrt router firmware project has largely eliminated the problem of *buffe
 
 This is a set of scripts that we use to measure (and improve) latency in home routers (and everywhere else!) [http://bufferbloat.net/projects/cerowrt](http://bufferbloat.net/projects/cerowrt)
 
-The first two scripts measure the performance of your router.
+The first three scripts measure the performance of your router.
 
 The second two scripts configure the CeroWrt router consistently after flashing factory firmware, and set up a IPv6 6-in-4 tunnel to TunnelBroker.net.
 
+The remaining scripts collect troubleshooting information that helps us diagnose problems in the CeroWrt distribution.
+
 ## betterspeedtest.sh
 
-This script emulates the web-based test performed by speedtest.net, but does it one better. The script performs a download and an upload to a server on the Internet. The best part is that it simultaneously measures latency of pings to see whether the file transfers affect the latency. 
+This script emulates the web-based test performed by speedtest.net, but does it one better. While script performs a download and an upload to a server on the Internet, it simultaneously measures latency of pings to see whether the file transfers affect the responsiveness of your network. 
 
 Here's why that's important: If the data transfers do increase the latency/lag much, then other network activity, such as voice or video chat, gaming, and general network activity will also work poorly. Gamers will see this as lagging out when someone else uses the network. Skype and FaceTime will see dropouts or freezes. Latency is bad, and good routers will not allow it to happen.
 
-The betterspeedtest.sh script measures latency during file transfers. To invoke it:
+The betterspeedtest.sh script measures latency during file transfers. It can live in /usr/lib/sqm within CeroWrt. To invoke it:
 
-    sh betterspeedtest.sh [ -H netperf-server ] [ -t duration ] [ -p host-to-ping ] 
+    sh betterspeedtest.sh [ -H netperf-server ] [ -t duration ] [ -p host-to-ping ] [-n simultaneous-streams ]
 
 Options, if present, are:
 
 * -H | --host: DNS or Address of a netperf server (default - netperf.richb-hanover.com)
 * -t | --time: Duration for how long each direction's test should run - (default - 60 seconds)
 * -p | --ping: Host to ping to measure latency (default - gstatic.com)
+* -n | --number: Number of simultaneous sessions (default - 5 sessions)
 
-The output shows the download or upload speed, along with a summary of latencies, including min, max, average, median, and 10th and 90th percentiles so you can get a sense of the distribution. The tool also displays the percent packet loss. An example below, showing two measurements. 
+The output shows the one-way download and upload speed, along with a summary of latencies, including min, max, average, median, and 10th and 90th percentiles so you can get a sense of the distribution. The tool also displays the percent packet loss. The example below shows two measurements, bad and good. 
 
 On the left is a test run without SQM. Note that the latency gets huge (greater than 5 seconds), meaning that network performance would be terrible for anyone else using the network. 
 
 On the right is a test using SQM: the latency goes up a little (less than 23 msec under load), and network performance remains good.
 
-    Example with NO SQM                                           Example using SQM
+    Example with NO SQM - BAD                                     Example using SQM - GOOD
     
-    root@cerowrt:/usr/lib/sqm# sh speedtest.sh                    root@cerowrt:/usr/lib/sqm# sh speedtest.sh
-    Testing against netperf.richb-hanover.com while pinging       Testing against netperf.richb-hanover.com while pinging 
-        gstatic.com (60 seconds in each direction)                    gstatic.com (60 seconds in each direction)
+    root@cerowrt:/usr/lib/sqm# sh betterspeedtest.sh              root@cerowrt:/usr/lib/sqm# sh betterspeedtest.sh
+    [date/time] Testing against netperf.richb-hanover.com         [date/time] Testing against netperf.richb-hanover.com
+       with 5 simultaneous sessions while pinging gstatic.com         with 5 simultaneous sessions while pinging gstatic.com
+       (60 seconds in each direction)                                 (60 seconds in each direction)
     
      Download:  6.19 Mbps                                         Download:  4.75 Mbps
       Latency: (in msec, 58 pings, 0.00% packet loss)              Latency: (in msec, 61 pings, 0.00% packet loss)
@@ -57,39 +61,49 @@ On the right is a test using SQM: the latency goes up a little (less than 23 mse
           
 ## netperfrunner.sh
 
-Netperfrunner.sh is a shell script that runs several netperf commands simultaneously.
+This script runs several netperf commands simultaneously.
 This mimics the stress test of netperf-wrapper from Toke <toke@toke.dk> 
 but doesn't have the nice GUI result.
 This can live in /usr/lib/sqm within CeroWrt.
 
-When you start this script, it concurrently uploads and downloads four
-streams (files) for 60 seconds to a server on the Internet. This places a heavy load 
-on the bottleneck link of your network (probably your connection to the 
-Internet), and lets you measure:
-
-* total bandwidth available 
-* latency, if you run a ping in a separate terminal window
+When you start this script, it concurrently uploads and downloads several
+streams (files) to a server on the Internet. This places a heavy load 
+on the bottleneck link of your network (probably your connection to the Internet), 
+and lets you measure both the total bandwidth and the latency of the link during the transfers.
 
 To invoke the script:
 
-    sh netperfrunner.sh [ netperf-server-to-test ]
+    sh netperfrunner.sh [ -H netperf-server ] [ -t duration ] [ -p host-to-ping ] [-n simultaneous-streams ]
 
-where the optional *netperf-server-to-test* defaults to netperf.richb-hanover.com. The output of the script looks like this:
+Options, if present, are:
 
-    Starting Network Performance tests. It will take about 60 seconds.
-    It downloads four files, and concurrently uploads four files for maximum stress.
-    For best effect, you should start a ping before starting this script
-      to measure how much latency increases during the test. (It shouldn't
-      increase much at all.)
-    This test is part of the CeroWrt project. To learn more, visit:
-      http://bufferbloat.net/projects/cerowrt/
-    Download:  5.01 Mbps
-      Upload:  0.36 Mbps
+* -H | --host: DNS or Address of a netperf server (default - netperf.richb-hanover.com)
+* -t | --time: Duration for how long each direction's test should run - (default - 60 seconds)
+* -p | --ping: Host to ping to measure latency (default - gstatic.com)
+* -n | --number: Number of simultaneous sessions (default - 4 sessions)
 
-**Note:** The download and upload speeds reported may be considerably lower than your line's rated speed. This is not a bug, nor is it a problem with your internet connection. 
+The output of the script looks like this:
 
-Here's what's going on: During these file transfers, the acknowledge messages sent back to the sender consume an interesting fraction of the link's capacity (as much as 25%). 
-	 
+    root@cerowrt:/usr/lib/sqm# sh netperfrunner.sh
+    [date/time] Testing netperf.richb-hanover.com with 4 streams down and up 
+        while pinging gstatic.com. Takes about 60 seconds.
+    Download:  5.02 Mbps
+      Upload:  0.41 Mbps
+     Latency: (in msec, 61 pings, 15.00% packet loss)
+         Min: 44.494
+       10pct: 44.494
+      Median: 66.438
+         Avg: 68.559
+       90pct: 79.049
+         Max: 140.421
+
+**Note:** The download and upload speeds reported may be considerably lower than your line's rated speed. This is not a bug, nor is it a problem with your internet connection. That's because the acknowledge messages sent back to the sender consume an interesting fraction of the link's capacity (as much as 25%). 
+
+## networkhammer.sh
+
+This script continually invokes the netperfrunner script to provide a heavy load. It runs forever - Ctl-C will interrupt it. You won't need this often :-)
+ 
+---
 ## config-cerowrt.sh
 
 This script updates the factory settings of CeroWrt to a known-good configuration.
@@ -150,3 +164,10 @@ Configurations" tab and select "OpenWRT Backfire 10.03.1". Use the info to fill 
         [Restart your router. This seems to make a difference.]
   
 Presto! Your tunnel is up! Your computer should get a global IPv6 address, and should be able to communicate directly with IPv6 devices on the Internet. To test it, try: `ping6 ivp6.google.com`
+
+---
+## cerostats.sh
+
+This script collects a number of useful configuration settings and dynamic values for aid in diagnosing problems with CeroWrt. If you report a problem, it would be helpful to include the output of this script.
+
+By default, it collects information about the first 2.4GHz radio/interface, and writes the collected data to `/tmp/cerostats_output.txt`
