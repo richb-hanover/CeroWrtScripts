@@ -1,5 +1,8 @@
 #! /bin/sh
 # A collection of diagnostic commands to run when troubles arise.
+# Based on Sebastian Moeller's original from:
+# https://lists.bufferbloat.net/pipermail/cerowrt-devel/2014-April/002871.html
+#
 # The default script collects stats for the first 2.4GHz interface. 
 # Change for your situation.
 #
@@ -66,6 +69,5 @@ echo -e "\n" >> ${out_fqn}
 echo -e "[dmesg]" >> ${out_fqn}
 dmesg >> ${out_fqn}
 echo -e "" >> ${out_fqn}
-
 
 echo "Done... Stats written to ${out_fqn} (${0})"
