@@ -1,8 +1,8 @@
 CeroWrtScripts
 ==============
 
-The CeroWrt router firmware project has largely eliminated the problem of *bufferbloat*, 
-which is a common reason that people complain, "the Internet feels slow today." 
+The CeroWrt router firmware project has largely eliminated the problem of *bufferbloat*. 
+The symptoms are a common reason that people complain, "the Internet feels slow today." 
 The techniques that the CeroWrt team have proved out are being widely adopted across 
 the Internet to make everyone's network performance better.
 
@@ -16,6 +16,12 @@ These scripts include:
 and set up a IPv6 6-in-4 tunnel to TunnelBroker.net.
 
 * Scripts to collect troubleshooting information that helps us diagnose problems in the CeroWrt distribution.
+
+The simplest way to import these scripts in your CeroWrt router is to use git. Use `opkg` or the web GUI to install the git package into CeroWrt. Then use the following commands to install the scripts into /usr/lib/CeroWrtScripts:
+
+    cd /usr/lib
+    git clone git://github.com/richb-hanover/CeroWrtScripts.git
+
 
 ---
 ## betterspeedtest.sh
