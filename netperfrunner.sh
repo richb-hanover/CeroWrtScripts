@@ -18,7 +18,9 @@
 
 # Options: If options are present:
 #
-# -H | --host:   DNS or Address of a netperf server (default - netperf.richb-hanover.com)
+# -H | --host:   DNS or Address of a netperf server (default - netperf.bufferbloat.net)
+# Alternate servers are netperf-east (east coast US), netperf-west (california), and netperf-eu
+# (Denmark)
 # -t | --time:   Duration for how long each direction's test should run - (default - 60 seconds)
 # -p | --ping:   Host to ping to measure latency (default - gstatic.com)
 # -n | --number: Number of simultaneous sessions (default - 5 sessions)
@@ -69,7 +71,7 @@ summarize_pings() {
 #       4 sessions chosen to match default of RRUL test)
 
 # set an initial values for defaults
-TESTHOST="netperf.richb-hanover.com"
+TESTHOST="netperf.bufferbloat.net"
 TESTDUR="60"
 PINGHOST="gstatic.com"
 MAXSESSIONS=4

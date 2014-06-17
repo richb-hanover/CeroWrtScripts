@@ -9,7 +9,8 @@
 
 # Options: If options are present:
 #
-# -H | --host:   DNS or Address of a netperf server (default - netperf.richb-hanover.com)
+# -H | --host:   DNS or Address of a netperf server (default - netperf.bufferbloat.net)
+# Alternates are netperf-east, netperf-west, and netperf-eu
 # -t | --time:   Duration for how long each direction's test should run - (default - 60 seconds)
 # -p | --ping:   Host to ping to measure latency (default - gstatic.com)
 # -n | --number: Number of simultaneous sessions (default - 5 sessions)

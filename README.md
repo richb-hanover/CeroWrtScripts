@@ -36,7 +36,9 @@ The betterspeedtest.sh script measures latency during file transfers. It can liv
 
 Options, if present, are:
 
-* -H | --host: DNS or Address of a netperf server (default - netperf.richb-hanover.com)
+* -H | --host: DNS or Address of a netperf server (default - netperf.bufferbloat.net)
+* Alternates are netperf-east, netperf-west (east and west coast of the us), and
+* netperf-eu
 * -t | --time: Duration for how long each direction's test should run - (default - 60 seconds)
 * -p | --ping: Host to ping to measure latency (default - gstatic.com)
 * -n | --number: Number of simultaneous sessions (default - 5 sessions)
@@ -50,7 +52,7 @@ On the right is a test using SQM: the latency goes up a little (less than 23 mse
     Example with NO SQM - BAD                                     Example using SQM - GOOD
     
     root@cerowrt:/usr/lib/sqm# sh betterspeedtest.sh              root@cerowrt:/usr/lib/sqm# sh betterspeedtest.sh
-    [date/time] Testing against netperf.richb-hanover.com         [date/time] Testing against netperf.richb-hanover.com
+    [date/time] Testing against netperf.bufferbloat.net           [date/time] Testing against netperf.richb-hanover.com
        with 5 simultaneous sessions while pinging gstatic.com         with 5 simultaneous sessions while pinging gstatic.com
        (60 seconds in each direction)                                 (60 seconds in each direction)
     
@@ -90,7 +92,7 @@ To invoke the script:
 
 Options, if present, are:
 
-* -H | --host: DNS or Address of a netperf server (default - netperf.richb-hanover.com)
+* -H | --host: DNS or Address of a netperf server (default - netperf.bufferbloat.net)
 * -t | --time: Duration for how long each direction's test should run - (default - 60 seconds)
 * -p | --ping: Host to ping to measure latency (default - gstatic.com)
 * -n | --number: Number of simultaneous sessions (default - 4 sessions)
