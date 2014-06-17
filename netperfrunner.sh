@@ -11,13 +11,14 @@
 # a) total bandwidth available 
 # b) the distribution of ping latency
  
-# Usage: sh netperfrunner.sh [ -H netperf-server ] [ -t duration ] [ -t host-to-ping ] [ -n simultaneous-streams ]
+# Usage: sh netperfrunner.sh [ -4 -6 ] [ -H netperf-server ] [ -t duration ] [ -t host-to-ping ] [ -n simultaneous-streams ]
 
 # Options: If options are present:
 #
 # -H | --host:   DNS or Address of a netperf server (default - netperf.bufferbloat.net)
 #                Alternate servers are netperf-east (east coast US), netperf-west (California), 
 #                and netperf-eu (Denmark)
+# -4 | -6:       IPv4 or IPv6 
 # -t | --time:   Duration for how long each direction's test should run - (default - 60 seconds)
 # -p | --ping:   Host to ping to measure latency (default - gstatic.com)
 # -n | --number: Number of simultaneous sessions (default - 5 sessions)
@@ -72,6 +73,7 @@ TESTHOST="netperf.bufferbloat.net"
 TESTDUR="60"
 PINGHOST="gstatic.com"
 MAXSESSIONS=4
+TESTPROTO=-4
 
 # Create temp files for netperf up/download results
 ULFILE=`mktemp /tmp/netperfUL.XXXXXX` || exit 1
@@ -85,6 +87,7 @@ PINGFILE=`mktemp /tmp/measurepings.XXXXXX` || exit 1
 while [ $# -gt 0 ] 
 do
     case "$1" in
+	-4|-6) TESTPROTO=$1; shift 1 ;;
         -H|--host)
             case "$2" in
                 "") echo "Missing hostname" ; exit 1 ;;
@@ -118,7 +121,13 @@ echo "$DATE Testing $TESTHOST with $MAXSESSIONS streams down and up while pingin
 # echo "  http://bufferbloat.net/projects/cerowrt/"
 
 # Start Ping
+if [ $TESTPROTO -eq "-4" ]
+then
 ping $PINGHOST > $PINGFILE &
+else
+ping6 $PINGHOST > $PINGFILE &
+fi
+
 ping_pid=$!
 # echo "Ping PID: $ping_pid"
 
@@ -126,14 +135,14 @@ ping_pid=$!
 # netperf writes the sole output value (in Mbps) to stdout when completed
 for i in $( seq $MAXSESSIONS )
 do
-	netperf -H $TESTHOST -t TCP_STREAM -l $TESTDUR -v 0 -P 0 >> $ULFILE &
+	netperf $TESTPROTO -H $TESTHOST -t TCP_STREAM -l $TESTDUR -v 0 -P 0 >> $ULFILE &
 	# echo "Starting upload #$i $!"
 done
 
 # Start $MAXSESSIONS download datastreams from netperf server to the client
 for i in $( seq $MAXSESSIONS )
 do
-	netperf -H $TESTHOST -t TCP_MAERTS -l $TESTDUR -v 0 -P 0 >> $DLFILE &
+	netperf $TESTPROTO -H $TESTHOST -t TCP_MAERTS -l $TESTDUR -v 0 -P 0 >> $DLFILE &
 	# echo "Starting download #$i $!"
 done
 

@@ -5,13 +5,14 @@
 # Output the measured transfer rates and the resulting ping latency
 # It's better than 'speedtest.net' because it measures latency *while* measuring the speed.
 
-# Usage: sh betterspeedtest.sh [ -H netperf-server ] [ -t duration ] [ -t host-to-ping ] [ -n simultaneous-streams ]
+# Usage: sh betterspeedtest.sh [-4 -6] [ -H netperf-server ] [ -t duration ] [ -t host-to-ping ] [ -n simultaneous-streams ]
 
 # Options: If options are present:
 #
 # -H | --host:   DNS or Address of a netperf server (default - netperf.bufferbloat.net)
 #                Alternate servers are netperf-east (east coast US), netperf-west (California), 
 #                and netperf-eu (Denmark)
+# -4 | -6:       enable ipv4 or ipv6 testing (ipv4 is the default)
 # -t | --time:   Duration for how long each direction's test should run - (default - 60 seconds)
 # -p | --ping:   Host to ping to measure latency (default - gstatic.com)
 # -n | --number: Number of simultaneous sessions (default - 5 sessions)
@@ -102,7 +103,12 @@ measure_direction() {
 	# echo "Dots PID: $dots_pid"
 
 	# Start Ping
+	if [ $TESTPROTO -eq "-4" ]
+	then
 	ping $4 > $PINGFILE &
+	else
+	ping6 $4 > $PINGFILE &
+	fi
 	ping_pid=$!
 	# echo "Ping PID: $ping_pid"
 	
@@ -117,7 +123,7 @@ measure_direction() {
 	# netperf writes the sole output value (in Mbps) to stdout when completed
 	for i in $( seq $MAXSESSIONS )
 	do
-		netperf -H $TESTHOST -t $dir -l $TESTDUR -v 0 -P 0 >> $SPEEDFILE &
+		netperf $TESTPROTO -H $TESTHOST -t $dir -l $TESTDUR -v 0 -P 0 >> $SPEEDFILE &
 		#echo "Starting $!"
 	done
 	
@@ -145,7 +151,7 @@ measure_direction() {
 
 # ------- Start of the main routine --------
 
-# Usage: sh betterspeedtest.sh [ -H netperf-server ] [ -t duration ] [ -p host-to-ping ] [ -n simultaneous-sessions ]
+# Usage: sh betterspeedtest.sh [ -4 -6 ] [ -H netperf-server ] [ -t duration ] [ -p host-to-ping ] [ -n simultaneous-sessions ]
 
 # “H” and “host” DNS or IP address of the netperf server host (default: netperf.bufferbloat.net)
 # “t” and “time” Time to run the test in each direction (default: 60 seconds)
@@ -158,6 +164,7 @@ TESTHOST="netperf.bufferbloat.net"
 TESTDUR="60"
 PINGHOST="gstatic.com"
 MAXSESSIONS="5"
+TESTPROTO=-4
 
 # read the options
 
@@ -165,6 +172,7 @@ MAXSESSIONS="5"
 while [ $# -gt 0 ] 
 do
     case "$1" in
+	-4|-6) TESTPROTO=$1 ; shift 1 ;;
         -H|--host)
             case "$2" in
                 "") echo "Missing hostname" ; exit 1 ;;
@@ -186,7 +194,7 @@ do
         		*) MAXSESSIONS=$2 ; shift 2 ;;
         	esac ;;
         --) shift ; break ;;
-        *) echo "Usage: sh betterspeedtest.sh [ -H netperf-server ] [ -t duration ] [ -p host-to-ping ] [ -n simultaneous-sessions ]" ; exit 1 ;;
+        *) echo "Usage: sh betterspeedtest.sh [-4 -6] [ -H netperf-server ] [ -t duration ] [ -p host-to-ping ] [ -n simultaneous-sessions ]" ; exit 1 ;;
     esac
 done
 
