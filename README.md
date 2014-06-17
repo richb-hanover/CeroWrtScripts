@@ -1,7 +1,7 @@
 CeroWrtScripts
 ==============
 
-The CeroWrt router firmware project has largely eliminated the problem of *bufferbloat*. 
+The CeroWrt router firmware project has largely eliminated the problem of *bufferbloat* on Ethernet for home routers. 
 The symptoms are a common reason that people complain, "the Internet feels slow today." 
 The techniques that the CeroWrt team have proved out are being widely adopted across 
 the Internet to make everyone's network performance better.
@@ -12,16 +12,16 @@ These scripts include:
 
 * Scripts that measure the performance of your router or offer load to the network for testing.
 
-* Scripts to configure the CeroWrt router consistently after flashing factory firmware, 
-and set up a IPv6 6-in-4 tunnel to TunnelBroker.net.
+* Script to configure the CeroWrt router consistently after flashing factory firmware.
 
-* Scripts to collect troubleshooting information that helps us diagnose problems in the CeroWrt distribution.
+* Script to set up a IPv6 6-in-4 tunnel to TunnelBroker.net.
+
+* Script to collect troubleshooting information that helps us diagnose problems in the CeroWrt distribution.
 
 The simplest way to import these scripts in your CeroWrt router is to use git. Use `opkg` or the web GUI to install the git package into CeroWrt. Then use the following commands to install the scripts into /usr/lib/CeroWrtScripts:
 
     cd /usr/lib
     git clone git://github.com/richb-hanover/CeroWrtScripts.git
-
 
 ---
 ## betterspeedtest.sh
@@ -36,9 +36,9 @@ The betterspeedtest.sh script measures latency during file transfers. It can liv
 
 Options, if present, are:
 
-* -H | --host: DNS or Address of a netperf server (default - netperf.bufferbloat.net)
-* Alternates are netperf-east, netperf-west (east and west coast of the us), and
-* netperf-eu
+* -H | --host: DNS or Address of a netperf server (default - netperf.bufferbloat.net)  
+Alternate servers are netperf-east (east coast US), netperf-west (California), 
+and netperf-eu (Denmark)
 * -t | --time: Duration for how long each direction's test should run - (default - 60 seconds)
 * -p | --ping: Host to ping to measure latency (default - gstatic.com)
 * -n | --number: Number of simultaneous sessions (default - 5 sessions)
@@ -52,7 +52,7 @@ On the right is a test using SQM: the latency goes up a little (less than 23 mse
     Example with NO SQM - BAD                                     Example using SQM - GOOD
     
     root@cerowrt:/usr/lib/sqm# sh betterspeedtest.sh              root@cerowrt:/usr/lib/sqm# sh betterspeedtest.sh
-    [date/time] Testing against netperf.bufferbloat.net           [date/time] Testing against netperf.richb-hanover.com
+    [date/time] Testing against netperf.bufferbloat.net           [date/time] Testing against netperf.bufferbloat.net
        with 5 simultaneous sessions while pinging gstatic.com         with 5 simultaneous sessions while pinging gstatic.com
        (60 seconds in each direction)                                 (60 seconds in each direction)
     
@@ -92,7 +92,9 @@ To invoke the script:
 
 Options, if present, are:
 
-* -H | --host: DNS or Address of a netperf server (default - netperf.bufferbloat.net)
+* -H | --host: DNS or Address of a netperf server (default - netperf.bufferbloat.net)  
+Alternate servers are netperf-east (east coast US), netperf-west (California), 
+and netperf-eu (Denmark)
 * -t | --time: Duration for how long each direction's test should run - (default - 60 seconds)
 * -p | --ping: Host to ping to measure latency (default - gstatic.com)
 * -n | --number: Number of simultaneous sessions (default - 4 sessions)
@@ -100,7 +102,7 @@ Options, if present, are:
 The output of the script looks like this:
 
     root@cerowrt:/usr/lib/sqm# sh netperfrunner.sh
-    [date/time] Testing netperf.richb-hanover.com with 4 streams down and up 
+    [date/time] Testing netperf.bufferbloat.net with 4 streams down and up 
         while pinging gstatic.com. Takes about 60 seconds.
     Download:  5.02 Mbps
       Upload:  0.41 Mbps

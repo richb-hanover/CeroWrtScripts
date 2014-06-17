@@ -10,17 +10,14 @@
 #
 # a) total bandwidth available 
 # b) the distribution of ping latency
-# 
-# Copyright (c) 2104 - Rich Brown richb.hanover@gmail.com
-# GPLv2
-
+ 
 # Usage: sh netperfrunner.sh [ -H netperf-server ] [ -t duration ] [ -t host-to-ping ] [ -n simultaneous-streams ]
 
 # Options: If options are present:
 #
 # -H | --host:   DNS or Address of a netperf server (default - netperf.bufferbloat.net)
-# Alternate servers are netperf-east (east coast US), netperf-west (california), and netperf-eu
-# (Denmark)
+#                Alternate servers are netperf-east (east coast US), netperf-west (California), 
+#                and netperf-eu (Denmark)
 # -t | --time:   Duration for how long each direction's test should run - (default - 60 seconds)
 # -p | --ping:   Host to ping to measure latency (default - gstatic.com)
 # -n | --number: Number of simultaneous sessions (default - 5 sessions)
@@ -64,7 +61,7 @@ summarize_pings() {
 
 # Usage: sh betterspeedtest.sh [ -H netperf-server ] [ -t duration ] [ -p host-to-ping ]
 
-# “H” and “host” DNS or IP address of the netperf server host (default: netperf.richb-hanover.com)
+# “H” and “host” DNS or IP address of the netperf server host (default: netperf.bufferbloat.net)
 # “t” and “time” Time to run the test in each direction (default: 60 seconds)
 # “p” and “ping” Host to ping for latency measurements (default: gstatic.com)
 # "n" and "number" Number of simultaneous upload or download sessions (default: 4 sessions;

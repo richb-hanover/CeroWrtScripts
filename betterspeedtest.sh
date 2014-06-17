@@ -10,7 +10,8 @@
 # Options: If options are present:
 #
 # -H | --host:   DNS or Address of a netperf server (default - netperf.bufferbloat.net)
-# Alternates are netperf-east, netperf-west, and netperf-eu
+#                Alternate servers are netperf-east (east coast US), netperf-west (California), 
+#                and netperf-eu (Denmark)
 # -t | --time:   Duration for how long each direction's test should run - (default - 60 seconds)
 # -p | --ping:   Host to ping to measure latency (default - gstatic.com)
 # -n | --number: Number of simultaneous sessions (default - 5 sessions)
@@ -146,14 +147,14 @@ measure_direction() {
 
 # Usage: sh betterspeedtest.sh [ -H netperf-server ] [ -t duration ] [ -p host-to-ping ] [ -n simultaneous-sessions ]
 
-# “H” and “host” DNS or IP address of the netperf server host (default: netperf.richb-hanover.com)
+# “H” and “host” DNS or IP address of the netperf server host (default: netperf.bufferbloat.net)
 # “t” and “time” Time to run the test in each direction (default: 60 seconds)
 # “p” and “ping” Host to ping for latency measurements (default: gstatic.com)
 # "n" and "number" Number of simultaneous upload or download sessions (default: 5 sessions;
 #       5 sessions chosen empirically because total didn't increase much after that number)
 
 # set an initial values for defaults
-TESTHOST="netperf.richb-hanover.com"
+TESTHOST="netperf.bufferbloat.net"
 TESTDUR="60"
 PINGHOST="gstatic.com"
 MAXSESSIONS="5"
