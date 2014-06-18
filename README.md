@@ -2,7 +2,8 @@ CeroWrtScripts
 ==============
 
 The CeroWrt router firmware project has largely eliminated the problem of *bufferbloat* on Ethernet for home routers. 
-The symptoms are a common reason that people complain, "the Internet feels slow today." 
+This firmware makes a huge difference for wireless, too, although there's still more work to be done.
+The symptoms of bufferbloat give people cause to complain, "the Internet feels slow today." 
 The techniques that the CeroWrt team have proved out are being widely adopted across 
 the Internet to make everyone's network performance better.
 
@@ -18,14 +19,10 @@ These scripts include:
 
 * Script to collect troubleshooting information that helps us diagnose problems in the CeroWrt distribution.
 
-As of CeroWrt 3.10.44-3, these scripts are bundled into CeroWrt, so you can use them directly.
+These scripts are bundled into CeroWrt 3.10.44-3 and newer as the 'cerowrtscripts' package, saved in the `/usr/lib/CeroWrtScripts` directory.
+To get the newest versions, you can use `opkg update; opkg upgrade`
 
-If you are using an earlier version of firmware, you can use git to import these scripts. Use `opkg` or the web GUI to install the git package, then clone the repository. The following commands install the scripts into `/usr/lib/CeroWrtScripts`:
-
-    opkg update
-    opkg install git
-    cd /usr/lib
-    git clone git://github.com/richb-hanover/CeroWrtScripts.git
+If the scripts are not built into your version of CeroWrt, it is safe to put them in that CeroWrtScripts directory.
  
 ---
 ## betterspeedtest.sh
@@ -34,7 +31,7 @@ This script emulates the web-based test performed by speedtest.net, but does it 
 
 Here's why that's important: If the data transfers do increase the latency/lag much, then other network activity, such as voice or video chat, gaming, and general network activity will also work poorly. Gamers will see this as lagging out when someone else uses the network. Skype and FaceTime will see dropouts or freezes. Latency is bad, and good routers will not allow it to happen.
 
-The betterspeedtest.sh script measures latency during file transfers. It can live in /usr/lib/CeroWrtScripts (or use git to clone the repository, as described above). To invoke it:
+The betterspeedtest.sh script measures latency during file transfers. To invoke it:
 
     sh betterspeedtest.sh [ -4 | -6 ] [ -H netperf-server ] [ -t duration ] [ -p host-to-ping ] [-n simultaneous-streams ]
 
@@ -56,7 +53,7 @@ On the right is a test using SQM: the latency goes up a little (less than 23 mse
 
     Example with NO SQM - BAD                                     Example using SQM - GOOD
     
-    root@cerowrt:/usr/lib/sqm# sh betterspeedtest.sh              root@cerowrt:/usr/lib/sqm# sh betterspeedtest.sh
+    root@cerowrt:/usr/lib/CeroWrtScripts# sh betterspeedtest.sh   root@cerowrt:/usr/lib/CeroWrtScripts# sh betterspeedtest.sh
     [date/time] Testing against netperf.bufferbloat.net (ipv4)    [date/time] Testing against netperf.bufferbloat.net (ipv4)
        with 5 simultaneous sessions while pinging gstatic.com        with 5 simultaneous sessions while pinging gstatic.com
        (60 seconds in each direction)                                (60 seconds in each direction)
@@ -85,7 +82,6 @@ On the right is a test using SQM: the latency goes up a little (less than 23 mse
 This script runs several netperf commands simultaneously.
 This mimics the stress test of netperf-wrapper from Toke <toke@toke.dk> 
 but doesn't have the nice GUI result.
-The script can live in /usr/lib/CeroWrtScripts (or use git to clone the repository, as described above). 
 
 When you start this script, it concurrently uploads and downloads several
 streams (files) to a server on the Internet. This places a heavy load 
@@ -108,7 +104,7 @@ and netperf-eu (Denmark)
 
 The output of the script looks like this:
 
-    root@cerowrt:/usr/lib/sqm# sh netperfrunner.sh
+    root@cerowrt:/usr/lib/CeroWrtScripts# sh netperfrunner.sh
     [date/time] Testing netperf.bufferbloat.net (ipv4) with 4 streams down and up 
         while pinging gstatic.com. Takes about 60 seconds.
     Download:  5.02 Mbps
@@ -126,7 +122,7 @@ The output of the script looks like this:
 ---
 ## networkhammer.sh
 
-This script continually invokes the netperfrunner script to provide a heavy load. It runs forever - Ctl-C will interrupt it. You won't need this often :-)
+This script continually invokes the netperfrunner script to provide a heavy load. It runs forever - Ctl-C will interrupt it. 
  
 ---
 ## config-cerowrt.sh
