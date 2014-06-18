@@ -32,13 +32,14 @@ Here's why that's important: If the data transfers do increase the latency/lag m
 
 The betterspeedtest.sh script measures latency during file transfers. It can live in /usr/lib/sqm within CeroWrt. To invoke it:
 
-    sh betterspeedtest.sh [ -H netperf-server ] [ -t duration ] [ -p host-to-ping ] [-n simultaneous-streams ]
+    sh betterspeedtest.sh [ -4 | -6 ] [ -H netperf-server ] [ -t duration ] [ -p host-to-ping ] [-n simultaneous-streams ]
 
 Options, if present, are:
 
 * -H | --host: DNS or Address of a netperf server (default - netperf.bufferbloat.net)  
 Alternate servers are netperf-east (east coast US), netperf-west (California), 
 and netperf-eu (Denmark)
+* -4 | -6:     Enable ipv4 or ipv6 testing (default - ipv4)
 * -t | --time: Duration for how long each direction's test should run - (default - 60 seconds)
 * -p | --ping: Host to ping to measure latency (default - gstatic.com)
 * -n | --number: Number of simultaneous sessions (default - 5 sessions)
@@ -52,9 +53,9 @@ On the right is a test using SQM: the latency goes up a little (less than 23 mse
     Example with NO SQM - BAD                                     Example using SQM - GOOD
     
     root@cerowrt:/usr/lib/sqm# sh betterspeedtest.sh              root@cerowrt:/usr/lib/sqm# sh betterspeedtest.sh
-    [date/time] Testing against netperf.bufferbloat.net           [date/time] Testing against netperf.bufferbloat.net
-       with 5 simultaneous sessions while pinging gstatic.com         with 5 simultaneous sessions while pinging gstatic.com
-       (60 seconds in each direction)                                 (60 seconds in each direction)
+    [date/time] Testing against netperf.bufferbloat.net (ipv4)    [date/time] Testing against netperf.bufferbloat.net (ipv4)
+       with 5 simultaneous sessions while pinging gstatic.com        with 5 simultaneous sessions while pinging gstatic.com
+       (60 seconds in each direction)                                (60 seconds in each direction)
     
      Download:  6.19 Mbps                                         Download:  4.75 Mbps
       Latency: (in msec, 58 pings, 0.00% packet loss)              Latency: (in msec, 61 pings, 0.00% packet loss)
@@ -73,7 +74,8 @@ On the right is a test using SQM: the latency goes up a little (less than 23 mse
           Avg: 3587.534                                                Avg: 50.486
         90pct: 5163.901                                              90pct: 56.061
           Max: 5334.262                                                Max: 69.333
-          
+
+---         
 ## netperfrunner.sh
 
 This script runs several netperf commands simultaneously.
@@ -88,13 +90,14 @@ and lets you measure both the total bandwidth and the latency of the link during
 
 To invoke the script:
 
-    sh netperfrunner.sh [ -H netperf-server ] [ -t duration ] [ -p host-to-ping ] [-n simultaneous-streams ]
+    sh netperfrunner.sh [ -4 | -6 ] [ -H netperf-server ] [ -t duration ] [ -p host-to-ping ] [-n simultaneous-streams ]
 
 Options, if present, are:
 
 * -H | --host: DNS or Address of a netperf server (default - netperf.bufferbloat.net)  
 Alternate servers are netperf-east (east coast US), netperf-west (California), 
 and netperf-eu (Denmark)
+* -4 | -6: Enable ipv4 or ipv6 testing (default - ipv4)
 * -t | --time: Duration for how long each direction's test should run - (default - 60 seconds)
 * -p | --ping: Host to ping to measure latency (default - gstatic.com)
 * -n | --number: Number of simultaneous sessions (default - 4 sessions)
@@ -102,7 +105,7 @@ and netperf-eu (Denmark)
 The output of the script looks like this:
 
     root@cerowrt:/usr/lib/sqm# sh netperfrunner.sh
-    [date/time] Testing netperf.bufferbloat.net with 4 streams down and up 
+    [date/time] Testing netperf.bufferbloat.net (ipv4) with 4 streams down and up 
         while pinging gstatic.com. Takes about 60 seconds.
     Download:  5.02 Mbps
       Upload:  0.41 Mbps
@@ -114,8 +117,9 @@ The output of the script looks like this:
        90pct: 79.049
          Max: 140.421
 
-**Note:** The download and upload speeds reported may be considerably lower than your line's rated speed. This is not a bug, nor is it a problem with your internet connection. That's because the acknowledge messages sent back to the sender consume an interesting fraction of the link's capacity (as much as 25%). 
+**Note:** The download and upload speeds reported may be considerably lower than your line's rated speed. This is not a bug, nor is it a problem with your internet connection. That's because the acknowledge messages sent back to the sender consume a significant fraction of the link's capacity (as much as 25%). 
 
+---
 ## networkhammer.sh
 
 This script continually invokes the netperfrunner script to provide a heavy load. It runs forever - Ctl-C will interrupt it. You won't need this often :-)
@@ -162,6 +166,7 @@ may reset the wireless network.
 
 **Note:** If you use a secondary CeroWrt router, you can create another copy of this script, and use it to set different configuration parameters (perhaps different subnets, radio channels, SSIDs, enable mDNS, etc).  
 
+---
 ## tunnelbroker.sh
 
 This script configures CeroWrt to create an IPv6 tunnel. 

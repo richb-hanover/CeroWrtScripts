@@ -87,7 +87,7 @@ PINGFILE=`mktemp /tmp/measurepings.XXXXXX` || exit 1
 while [ $# -gt 0 ] 
 do
     case "$1" in
-	-4|-6) TESTPROTO=$1; shift 1 ;;
+	    -4|-6) TESTPROTO=$1; shift 1 ;;
         -H|--host)
             case "$2" in
                 "") echo "Missing hostname" ; exit 1 ;;
@@ -113,8 +113,16 @@ do
     esac
 done
 
+# Start main test
+
+if [ $TESTPROTO -eq "-4" ]
+then
+	PROTO="ipv4"
+else
+	PROTO="ipv6"
+fi
 DATE=`date "+%Y-%m-%d %H:%M:%S"`
-echo "$DATE Testing $TESTHOST with $MAXSESSIONS streams down and up while pinging $PINGHOST. Takes about $TESTDUR seconds."
+echo "$DATE Testing $TESTHOST ($PROTO) with $MAXSESSIONS streams down and up while pinging $PINGHOST. Takes about $TESTDUR seconds."
 # echo "It downloads four files, and concurrently uploads four files for maximum stress."
 # echo "It also pings a well-connected host, and prints a summary of the latency results."
 # echo "This test is part of the CeroWrt project. To learn more, visit:"
@@ -123,11 +131,10 @@ echo "$DATE Testing $TESTHOST with $MAXSESSIONS streams down and up while pingin
 # Start Ping
 if [ $TESTPROTO -eq "-4" ]
 then
-ping $PINGHOST > $PINGFILE &
+	ping $TESTHOST > $PINGFILE &
 else
-ping6 $PINGHOST > $PINGFILE &
+	ping6 $TESTHOST > $PINGFILE &
 fi
-
 ping_pid=$!
 # echo "Ping PID: $ping_pid"
 

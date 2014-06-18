@@ -105,9 +105,9 @@ measure_direction() {
 	# Start Ping
 	if [ $TESTPROTO -eq "-4" ]
 	then
-	ping $4 > $PINGFILE &
+		ping $4 > $PINGFILE &
 	else
-	ping6 $4 > $PINGFILE &
+		ping6 $4 > $PINGFILE &
 	fi
 	ping_pid=$!
 	# echo "Ping PID: $ping_pid"
@@ -172,7 +172,7 @@ TESTPROTO=-4
 while [ $# -gt 0 ] 
 do
     case "$1" in
-	-4|-6) TESTPROTO=$1 ; shift 1 ;;
+	    -4|-6) TESTPROTO=$1 ; shift 1 ;;
         -H|--host)
             case "$2" in
                 "") echo "Missing hostname" ; exit 1 ;;
@@ -200,8 +200,14 @@ done
 
 # Start the main test
 
+if [ $TESTPROTO -eq "-4" ]
+then
+	PROTO="ipv4"
+else
+	PROTO="ipv6"
+fi
 DATE=`date "+%Y-%m-%d %H:%M:%S"`
-echo "$DATE Testing against $TESTHOST with $MAXSESSIONS simultaneous sessions while pinging $PINGHOST ($TESTDUR seconds in each direction)"
+echo "$DATE Testing against $TESTHOST ($PROTO) with $MAXSESSIONS simultaneous sessions while pinging $PINGHOST ($TESTDUR seconds in each direction)"
 
 # Catch a Ctl-C and stop the pinging and the print_dots
 trap kill_pings_and_dots_and_exit SIGHUP SIGINT SIGTERM
