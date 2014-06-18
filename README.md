@@ -18,11 +18,15 @@ These scripts include:
 
 * Script to collect troubleshooting information that helps us diagnose problems in the CeroWrt distribution.
 
-The simplest way to import these scripts in your CeroWrt router is to use git. Use `opkg` or the web GUI to install the git package into CeroWrt. Then use the following commands to install the scripts into /usr/lib/CeroWrtScripts:
+As of CeroWrt 3.10.44-3, these scripts are bundled into CeroWrt, so you can use them directly.
 
+If you are using an earlier version of firmware, you can use git to import these scripts. Use `opkg` or the web GUI to install the git package, then clone the repository. The following commands install the scripts into `/usr/lib/CeroWrtScripts`:
+
+    opkg update
+    opkg install git
     cd /usr/lib
     git clone git://github.com/richb-hanover/CeroWrtScripts.git
-
+ 
 ---
 ## betterspeedtest.sh
 
@@ -30,7 +34,7 @@ This script emulates the web-based test performed by speedtest.net, but does it 
 
 Here's why that's important: If the data transfers do increase the latency/lag much, then other network activity, such as voice or video chat, gaming, and general network activity will also work poorly. Gamers will see this as lagging out when someone else uses the network. Skype and FaceTime will see dropouts or freezes. Latency is bad, and good routers will not allow it to happen.
 
-The betterspeedtest.sh script measures latency during file transfers. It can live in /usr/lib/sqm within CeroWrt. To invoke it:
+The betterspeedtest.sh script measures latency during file transfers. It can live in /usr/lib/CeroWrtScripts (or use git to clone the repository, as described above). To invoke it:
 
     sh betterspeedtest.sh [ -4 | -6 ] [ -H netperf-server ] [ -t duration ] [ -p host-to-ping ] [-n simultaneous-streams ]
 
@@ -81,7 +85,7 @@ On the right is a test using SQM: the latency goes up a little (less than 23 mse
 This script runs several netperf commands simultaneously.
 This mimics the stress test of netperf-wrapper from Toke <toke@toke.dk> 
 but doesn't have the nice GUI result.
-This can live in /usr/lib/sqm within CeroWrt.
+The script can live in /usr/lib/CeroWrtScripts (or use git to clone the repository, as described above). 
 
 When you start this script, it concurrently uploads and downloads several
 streams (files) to a server on the Internet. This places a heavy load 
