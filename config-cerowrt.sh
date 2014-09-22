@@ -146,7 +146,6 @@
 # REVIP=ip.new.your
 # echo 'Changing IP subnets to' $NEWIP 'and' $REVIP
 # sed -i s#172.30.42#$NEWIP#g /etc/config/* 
-# sed -i s#42.30.172#$REVIP#g /etc/chroot/named/etc/bind/*/*
 
 # === Update local DNS domain ==================
 # DNS: 
@@ -154,7 +153,7 @@
 #
 # NEWDNS=home.lan
 # echo 'Changing local domain to' $NEWDNS
-# sed -i s#home.lan#$NEWDNS#g /etc/config/* /etc/hosts /etc/chroot/named/etc/bind/*/* 
+# sed -i s#home.lan#$NEWDNS#g /etc/config/*  
 
 # ==============================
 # Set Smart Queue Management (SQM) values for your own network
