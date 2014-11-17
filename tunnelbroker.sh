@@ -37,6 +37,10 @@ opkg install 6in4
 # automatically generated specifically for *your* tunnel 
 # Copy/paste the information from the Example Configurations
 # generated for the OpenWRT Backfire 10.03.1 dropdown
+# then edit the following to match your parameters.
+#
+# NOTE: The username should be your plain UserID (the "Account Name:
+# 	on the tunnelbroker.net site) not the long alphanumeric string
 #
 echo 'Setting up HE.net tunnel'
 # ------- USE THE INFORMATION FROM TUNNELBROKER.NET HERE --------
@@ -45,13 +49,14 @@ uci set network.henet.proto=6in4
 uci set network.henet.peeraddr=xxx.xxx.xxx.xxx
 uci set network.henet.ip6addr='2001:470:ABCD::2/64'
 uci set network.henet.tunnelid=123456
-uci set network.henet.username=tbxxxxxxxx.xxxxxx
+uci set network.henet.username='your-plain-userid'
 uci set network.henet.password='your-password'
 # ------- END OF TUNNELBROKER.NET INFO --------
 
 # ------- Additional configuration info required for the tunnel --------
 # This automatically assigns each LAN interface a /64 from your routed /48
-uci set network.henet.ip6prefix='2001:470:ABCD::/48'   # Use your routed /48 prefix from HE.net
+# Set the ip6prefix to use your routed /48 prefix from HE.net
+uci set network.henet.ip6prefix='2001:470:ABCD::/48'   
 uci set network.henet.mtu=1424
 uci set network.henet.ttl=64
 uci commit network
@@ -77,7 +82,7 @@ echo 'Done. You should restart the router now to make these take effect.'
 #
 # CeroWrt is configured to do a lot of stuff automatically, so you may not notice
 # all the magic that's happening under the covers. Here are some of the configuration
-# tricks that have been worked out over the various test releases of CeroWrt 3.7.x
+# tricks that have been worked out over the various test releases of CeroWrt 3.10.x
 #
 # IPv6-in-IPv4 tunnel to Hurricane Electric (http://HE.net):
 #
@@ -101,7 +106,7 @@ echo 'Done. You should restart the router now to make these take effect.'
 # The final step in the script is to restart the network and firewall services.
 # It never hurts to reboot the router after this completes.
 #
-# NB: This has been tested with CeroWrt 3.7.5-2 (Feb 2013)
+# NB: This has been tested with CeroWrt 3.10.50-1 (July 2014)
 
 # ==============================================
 # Re-establishing the Tunnel
