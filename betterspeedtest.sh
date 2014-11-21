@@ -113,7 +113,7 @@ measure_direction() {
 	# echo "Ping PID: $ping_pid"
 	
 	# Start netperf with the proper direction
-	if [ $1 == "Download" ]; then
+	if [ $1 = "Download" ]; then
 		dir="TCP_MAERTS"
 	else
 		dir="TCP_STREAM"
