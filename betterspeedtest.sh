@@ -5,7 +5,7 @@
 # Output the measured transfer rates and the resulting ping latency
 # It's better than 'speedtest.net' because it measures latency *while* measuring the speed.
 
-# Usage: sh betterspeedtest.sh [-4 -6] [ -H netperf-server ] [ -t duration ] [ -t host-to-ping ] [ -n simultaneous-streams ]
+# Usage: sh betterspeedtest.sh [-4 -6] [ -H netperf-server ] [ -t duration ] [ -p host-to-ping ] [ -n simultaneous-streams ]
 
 # Options: If options are present:
 #
