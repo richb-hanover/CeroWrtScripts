@@ -131,9 +131,9 @@ echo "$DATE Testing $TESTHOST ($PROTO) with $MAXSESSIONS streams down and up whi
 # Start Ping
 if [ $TESTPROTO -eq "-4" ]
 then
-	ping $TESTHOST > $PINGFILE &
+	ping $PINGHOST > $PINGFILE &
 else
-	ping6 $TESTHOST > $PINGFILE &
+	ping6 $PINGHOST > $PINGFILE &
 fi
 ping_pid=$!
 # echo "Ping PID: $ping_pid"

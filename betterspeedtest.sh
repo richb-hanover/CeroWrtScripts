@@ -210,7 +210,7 @@ DATE=`date "+%Y-%m-%d %H:%M:%S"`
 echo "$DATE Testing against $TESTHOST ($PROTO) with $MAXSESSIONS simultaneous sessions while pinging $PINGHOST ($TESTDUR seconds in each direction)"
 
 # Catch a Ctl-C and stop the pinging and the print_dots
-trap kill_pings_and_dots_and_exit SIGHUP SIGINT SIGTERM
+trap kill_pings_and_dots_and_exit HUP INT TERM
 
 measure_direction "Download" $TESTHOST $TESTDUR $PINGHOST $MAXSESSIONS
 measure_direction "  Upload" $TESTHOST $TESTDUR $PINGHOST $MAXSESSIONS
