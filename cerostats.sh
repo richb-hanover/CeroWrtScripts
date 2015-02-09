@@ -30,6 +30,10 @@ echo -e "[ifconfig]" >> ${out_fqn}
 ifconfig >> ${out_fqn}
 echo -e "\n" >> ${out_fqn}
 
+echo -e "[top]" >> ${out_fqn}
+top -b | head -n 20 >> ${out_fqn}
+echo -e "\n" >> ${out_fqn}
+
 echo -e "[tc -s qdisc show dev ${wlan_if}]" >> ${out_fqn}
 tc -s qdisc show dev ${wlan_if} >> ${out_fqn}
 echo -e "\n" >> ${out_fqn}
