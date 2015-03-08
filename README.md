@@ -80,8 +80,7 @@ On the right is a test using SQM: the latency goes up a little (less than 23 mse
 ## netperfrunner.sh
 
 This script runs several netperf commands simultaneously.
-This mimics the stress test of netperf-wrapper from Toke <toke@toke.dk> 
-but doesn't have the nice GUI result.
+This mimics the stress test of [netperf-wrapper](https://github.com/tohojo/netperf-wrapper) [Github] but without the nice GUI result.
 
 When you start this script, it concurrently uploads and downloads several
 streams (files) to a server on the Internet. This places a heavy load 
