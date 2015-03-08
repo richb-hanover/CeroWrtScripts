@@ -128,7 +128,10 @@ measure_direction() {
 	done
 	
 	# Wait until each of the background netperf processes completes 
-	for i in `pgrep netperf`		# gets a list of PIDs for processes named 'netperf'
+	# echo "Process is $$"
+	# echo `pgrep -P $$ netperf `
+
+	for i in `pgrep -P $$ netperf `		# gets a list of PIDs for child processes named 'netperf'
 	do
 		#echo "Waiting for $i"
 		wait $i

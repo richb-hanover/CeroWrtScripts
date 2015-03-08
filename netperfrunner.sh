@@ -154,7 +154,10 @@ do
 done
 
 # Wait until each of the background netperf processes completes 
-for i in `pgrep netperf -P $$`		# get a list of PIDs for child processes named 'netperf'
+# echo "Process is $$"
+# echo `pgrep -P $$ netperf `
+
+for i in `pgrep -P $$ netperf`		# get a list of PIDs for child processes named 'netperf'
 do
 	# echo "Waiting for $i"
 	wait $i
