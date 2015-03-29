@@ -7,7 +7,7 @@ The symptoms of bufferbloat give people cause to complain, "the Internet feels s
 The techniques that the CeroWrt team have proved out are being widely adopted across 
 the Internet to make everyone's network performance better.
 
-This is a set of scripts that we use to measure (and improve) latency in home routers (and everywhere else!) 
+This is a set of scripts (sometimes also called "Ceroscripts") that we use to measure (and improve) latency in home routers (and everywhere else!) 
 [http://bufferbloat.net/projects/cerowrt](http://bufferbloat.net/projects/cerowrt)
 These scripts include:
 
