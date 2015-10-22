@@ -89,14 +89,16 @@ kill_pings_and_dots_and_exit() {
 
 # ------------ Measure speed and ping latency for one direction ----------------
 #
-# Called with measure_direction "Download" $TESTHOST $TESTDUR $PINGHOST
+# Call measure_direction() with single parameter - "Download" or "  Upload"
+#   The function gets other info from globals determined from command-line arguments
 
 measure_direction() {
 
 	# Create temp files
 	PINGFILE=`mktemp /tmp/measurepings.XXXXXX` || exit 1
 	SPEEDFILE=`mktemp /tmp/netperfUL.XXXXXX` || exit 1
-	
+	DIRECTION=$1
+
 	# Start dots
 	print_dots &
 	dots_pid=$!
@@ -105,15 +107,15 @@ measure_direction() {
 	# Start Ping
 	if [ $TESTPROTO -eq "-4" ]
 	then
-		ping $4 > $PINGFILE &
+		ping  $PINGHOST > $PINGFILE &
 	else
-		ping6 $4 > $PINGFILE &
+		ping6 $PINGHOST > $PINGFILE &
 	fi
 	ping_pid=$!
 	# echo "Ping PID: $ping_pid"
 	
 	# Start netperf with the proper direction
-	if [ $1 = "Download" ]; then
+	if [ $DIRECTION = "Download" ]; then
 		dir="TCP_MAERTS"
 	else
 		dir="TCP_STREAM"
@@ -124,7 +126,7 @@ measure_direction() {
 	for i in $( seq $MAXSESSIONS )
 	do
 		netperf $TESTPROTO -H $TESTHOST -t $dir -l $TESTDUR -v 0 -P 0 >> $SPEEDFILE &
-		#echo "Starting $!"
+		# echo "Starting PID $! params: $TESTPROTO -H $TESTHOST -t $dir -l $TESTDUR -v 0 -P 0 >> $SPEEDFILE"
 	done
 	
 	# Wait until each of the background netperf processes completes 
@@ -167,7 +169,7 @@ TESTHOST="netperf.bufferbloat.net"
 TESTDUR="60"
 PINGHOST="gstatic.com"
 MAXSESSIONS="5"
-TESTPROTO=-4
+TESTPROTO="-4"
 
 # read the options
 
@@ -215,6 +217,6 @@ echo "$DATE Testing against $TESTHOST ($PROTO) with $MAXSESSIONS simultaneous se
 # Catch a Ctl-C and stop the pinging and the print_dots
 trap kill_pings_and_dots_and_exit HUP INT TERM
 
-measure_direction "Download" $TESTHOST $TESTDUR $PINGHOST $MAXSESSIONS
-measure_direction "  Upload" $TESTHOST $TESTDUR $PINGHOST $MAXSESSIONS
+measure_direction "Download" 
+measure_direction "  Upload" 
 

@@ -109,7 +109,7 @@ do
         		*) MAXSESSIONS=$2 ; shift 2 ;;
         	esac ;;
         --) shift ; break ;;
-        *) echo "Usage: sh Netperfrunner.sh [ -H netperf-server ] [ -t duration ] [ -p host-to-ping ] [ -n simultaneous-streams ]" ; exit 1 ;;
+        *) echo "Usage: sh Netperfrunner.sh [-4 -6] [ -H netperf-server ] [ -t duration ] [ -p host-to-ping ] [ -n simultaneous-streams ]" ; exit 1 ;;
     esac
 done
 
@@ -131,7 +131,7 @@ echo "$DATE Testing $TESTHOST ($PROTO) with $MAXSESSIONS streams down and up whi
 # Start Ping
 if [ $TESTPROTO -eq "-4" ]
 then
-	ping $PINGHOST > $PINGFILE &
+	ping  $PINGHOST > $PINGFILE &
 else
 	ping6 $PINGHOST > $PINGFILE &
 fi
