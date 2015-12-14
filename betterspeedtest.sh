@@ -23,6 +23,13 @@
 # Summarize the contents of the ping's output file to show min, avg, median, max, etc.
 # 	input parameter ($1) file contains the output of the ping command
 
+if ! (seq 1) > /dev/null 2>/dev/null; then
+	# probably a non-GNU platform, seq is jot there
+	seq() {
+		jot "$@"
+	}
+fi
+
 summarize_pings() {			
 	
 	# Process the ping times, and summarize the results
@@ -57,7 +64,7 @@ summarize_pings() {
 print_dots() {
 	while : ; do
 		printf "."
-		sleep 1s
+		sleep 1
 	done
 }
 
