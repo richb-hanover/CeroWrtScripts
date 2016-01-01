@@ -1,15 +1,21 @@
 CeroWrtScripts
 ==============
 
-The CeroWrt router firmware project has largely eliminated the problem of *bufferbloat* on Ethernet for home routers. 
-This firmware makes a huge difference for wireless, too, although there's still more work to be done.
-The symptoms of bufferbloat give people cause to complain, "the Internet feels slow today." 
-The techniques that the CeroWrt team have proved out are being widely adopted across 
-the Internet to make everyone's network performance better.
+**TL;DR** These scripts test your network for *bufferbloat*, and configure your CeroWrt router.
 
-This is a set of scripts (sometimes also called "Ceroscripts") that we use to measure (and improve) latency in home routers (and everywhere else!) 
-[http://bufferbloat.net/projects/cerowrt](http://bufferbloat.net/projects/cerowrt)
-These scripts include:
+1. **Test your network for bufferbloat** from any Linux or OSX computer with *betterspeedtest.sh* and *netperfwrapper.sh* Both scripts require the netperf benchmark program from [http://netperf.org](http://netperf.org)
+
+2. **Configure a CeroWrt Router** to a repeatable state with *config-cerowrt.sh*, *tunnelbroker.sh*, and *cerostats.sh*. 
+
+## About CeroWrt
+
+The [CeroWrt router firmware project](http://www.bufferbloat.net/projects/cerowrt/wiki) has largely eliminated the problem of *bufferbloat* on Ethernet for home routers. 
+This algorithm makes a huge difference for wireless, too, although there's still more work to be done.
+
+Bufferbloat is undesired latency that happens when routers buffer too much data during periods of high traffic. The symptoms of bufferbloat makes "the Internet feel slow." 
+The  Smart Queue Management (SQM) techniques based on the [fq_codel](http://www.bufferbloat.net/projects/codel/wiki) algorithm developed by the CeroWrt team are being widely adopted across the Internet to make everyone's network performance better.
+
+We developed the scripts below (sometimes also called "Ceroscripts") to measure the improvements to latency in as we worked on CeroWrt. These scripts include:
 
 * Scripts that measure the performance of your router or offer load to the network for testing.
 
@@ -19,7 +25,7 @@ These scripts include:
 
 * Script to collect troubleshooting information that helps us diagnose problems in the CeroWrt distribution.
 
-These scripts are bundled into CeroWrt 3.10.44-3 and newer as the 'cerowrtscripts' package, saved in the `/usr/lib/CeroWrtScripts` directory.
+These scripts are bundled into the final CeroWrt build as the 'cerowrtscripts' package, saved in the `/usr/lib/CeroWrtScripts` directory.
 To get the newest versions, you can use `opkg update; opkg upgrade`
 
 If the scripts are not built into your version of CeroWrt, it is safe to put them in that CeroWrtScripts directory.
@@ -27,11 +33,16 @@ If the scripts are not built into your version of CeroWrt, it is safe to put the
 ---
 ## betterspeedtest.sh
 
-This script emulates the web-based test performed by speedtest.net, but does it one better. While script performs a download and an upload to a server on the Internet, it simultaneously measures latency of pings to see whether the file transfers affect the responsiveness of your network. 
+This script emulates a web-based speedtest, but does it one better. 
+During the download and upload, the script simultaneously measures latency of pings to see whether the data transfers affect the responsiveness of your network. 
 
-Here's why that's important: If the data transfers do increase the latency/lag much, then other network activity, such as voice or video chat, gaming, and general network activity will also work poorly. Gamers will see this as lagging out when someone else uses the network. Skype and FaceTime will see dropouts or freezes. Latency is bad, and good routers will not allow it to happen.
+Here's why that's important: If the data transfers increase the latency/lag significantly, then other network activity, such as voice or video chat, gaming, and general network activity will also work poorly. 
+Gamers will see this as lagging out when someone else uses the network. 
+Skype and FaceTime will see dropouts or freezes. 
+Latency is bad, and good routers will control it.
 
-The betterspeedtest.sh script measures latency during file transfers. To invoke it:
+The betterspeedtest.sh script measures latency during data transfers. 
+It will run on any computer where you can install the [netperf](http://netperf.net) software. To invoke it:
 
     sh betterspeedtest.sh [ -4 | -6 ] [ -H netperf-server ] [ -t duration ] [ -p host-to-ping ] [-n simultaneous-streams ]
 
@@ -45,42 +56,48 @@ and netperf-eu (Denmark)
 * -p | --ping: Host to ping to measure latency (default - gstatic.com)
 * -n | --number: Number of simultaneous sessions (default - 5 sessions)
 
-The output shows separate (one-way) download and upload speed, along with a summary of latencies, including min, max, average, median, and 10th and 90th percentiles so you can get a sense of the distribution. The tool also displays the percent packet loss. The example below shows two measurements, bad and good. 
+The output shows separate (one-way) download and upload speed, along with a summary of latencies, including min, max, average, median, and 10th and 90th percentiles so you can get a sense of the distribution. The tool also displays the percent packet loss. 
 
-On the left is a test run without SQM. Note that the latency gets huge (greater than 5 seconds), meaning that network performance would be terrible for anyone else using the network. 
+**Example:** The example below shows two measurements on a a 7mpbs/768kbps DSL circuit. 
+On the left is a test run without SQM; on the right is a test using SQM.
 
-On the right is a test using SQM: the latency goes up a little (less than 23 msec under load), and network performance remains good.
+* Without SQM, upload latency gets huge (greater than 5 seconds), meaning that network performance would be terrible for everyone during that time. In this test, there doesn't seem to be much bloat in the download direction, although it happens in many other circumstances.
 
-    Example with NO SQM - BAD                                     Example using SQM - GOOD
+* With SQM, transmit and receive rates remain comparable to the no-SQM case, while latency only goes up a little in either directions (less than 27 msec under load).
+
+Test results:  
+
+    Example with NO SQM - BAD                                     Example using SQM - GOOD 
     
     root@cerowrt:/usr/lib/CeroWrtScripts# sh betterspeedtest.sh   root@cerowrt:/usr/lib/CeroWrtScripts# sh betterspeedtest.sh
     [date/time] Testing against netperf.bufferbloat.net (ipv4)    [date/time] Testing against netperf.bufferbloat.net (ipv4)
        with 5 simultaneous sessions while pinging gstatic.com        with 5 simultaneous sessions while pinging gstatic.com
        (60 seconds in each direction)                                (60 seconds in each direction)
     
-     Download:  6.19 Mbps                                         Download:  4.75 Mbps
+     Download:  6.84 Mbps                                         Download:  6.91 Mbps
       Latency: (in msec, 58 pings, 0.00% packet loss)              Latency: (in msec, 61 pings, 0.00% packet loss)
-          Min: 43.399                                                  Min: 43.092
-        10pct: 156.092                                               10pct: 43.916
-       Median: 230.921                                              Median: 46.400
-          Avg: 248.849                                                 Avg: 46.575
-        90pct: 354.738                                               90pct: 48.514
-          Max: 385.507                                                 Max: 56.150
+          Min: 37.982                                                  Min: 38.696
+        10pct: 41.002                                                10pct: 42.565
+       Median: 57.647                                               Median: 54.135
+          Avg: 54.814                                                  Avg: 54.097
+        90pct: 62.689                                                90pct: 62.777
+          Max: 64.680                                                  Max: 65.401
     
-       Upload:  0.72 Mbps                                           Upload:  0.61 Mbps
-      Latency: (in msec, 59 pings, 0.00% packet loss)              Latency: (in msec, 53 pings, 0.00% packet loss)
-          Min: 43.699                                                  Min: 43.394
-        10pct: 352.521                                               10pct: 44.202
-       Median: 4208.574                                             Median: 50.061
-          Avg: 3587.534                                                Avg: 50.486
-        90pct: 5163.901                                              90pct: 56.061
-          Max: 5334.262                                                Max: 69.333
+       Upload:  0.74 Mbps                                           Upload:  0.76 Mbps
+      Latency: (in msec, 61 pings, 14.08% packet loss)             Latency: (in msec, 53 pings, 0.00% packet loss)
+          Min: 39.213                                                  Min: 38.241
+        10pct: 1404.113                                              10pct: 41.106
+       Median: 3392.531                                             Median: 46.484
+          Avg: 3244.456                                                Avg: 47.209
+        90pct: 4546.094                                              90pct: 52.409
+          Max: 5055.858                                                Max: 58.272
 
 ---         
+
 ## netperfrunner.sh
 
 This script runs several netperf commands simultaneously.
-This mimics the stress test of [netperf-wrapper](https://github.com/tohojo/netperf-wrapper) [Github] but without the nice GUI result.
+This mimics the stress test of [Flent](http://flent.org) (formerly known as netperf-wrapper) but without the nice GUI result.
 
 When you start this script, it concurrently uploads and downloads several
 streams (files) to a server on the Internet. This places a heavy load 
@@ -106,22 +123,22 @@ The output of the script looks like this:
     root@cerowrt:/usr/lib/CeroWrtScripts# sh netperfrunner.sh
     [date/time] Testing netperf.bufferbloat.net (ipv4) with 4 streams down and up 
         while pinging gstatic.com. Takes about 60 seconds.
-    Download:  5.02 Mbps
-      Upload:  0.41 Mbps
-     Latency: (in msec, 61 pings, 15.00% packet loss)
-         Min: 44.494
-       10pct: 44.494
-      Median: 66.438
-         Avg: 68.559
-       90pct: 79.049
-         Max: 140.421
+    Download:  5.29 Mbps
+      Upload:  0.39 Mbps
+     Latency: (in msec, 64 pings, 1.54% packet loss)
+         Min: 37.493
+       10pct: 41.625
+      Median: 61.724
+         Avg: 63.557
+       90pct: 84.536
+         Max: 118.194
 
-**Note:** The download and upload speeds reported may be considerably lower than your line's rated speed. This is not a bug, nor is it a problem with your internet connection. That's because the acknowledge messages sent back to the sender consume a significant fraction of the link's capacity (as much as 25%). 
+**Note:** The download and upload speeds reported may be considerably lower than your line's rated speed. This is not a bug, nor is it a problem with your internet connection. That's because the acknowledge messages for one stream can consume a significant fraction (as much as 25%) of the link's capacity in the opposite direction.
 
 ---
 ## networkhammer.sh
 
-This script continually invokes the netperfrunner script to provide a heavy load. It runs forever - Ctl-C will interrupt it. 
+This script continually invokes the netperfrunner script to provide a long-running heavy load. It runs forever - Ctl-C will interrupt it. 
  
 ---
 ## config-cerowrt.sh
