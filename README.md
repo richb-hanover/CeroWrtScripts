@@ -1,5 +1,6 @@
 CeroWrtScripts
 ==============
+**Update:** *These scripts are no longer maintained. They have been superceded by the [OpenWrtScripts repo](https://github.com/richb-hanover/OpenWrtScripts)*
 
 **TL;DR** These scripts test your network for *bufferbloat*, and configure your CeroWrt router.
 
